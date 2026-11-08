@@ -242,28 +242,53 @@ func (s *Server) trips(ctx context.Context, c *clients) ([]trip, error) {
 
 // ---- clothes you bought ----
 
-var fashionShops = []string{"zara", "h&m", "hm ", "mango", "c&a", "uniqlo", "primark", "bershka", "pull&bear", "pull & bear", "stradivarius", "massimo dutti", "cos ", "arket",
-	"zalando", "about you", "asos", "nike", "adidas", "puma", "deichmann", "reserved", "lc waikiki", "new yorker", "tommy", "levi", "s.oliver", "tally weijl", "sinsay",
-	"decathlon", "intersport", "buzz", "sport vision", "ccc", "humanic", "vinted", "shein", "next ", "gap ", "jack & jones", "vero moda", "only ", "lacoste", "ralph lauren",
-	"benetton", "calzedonia", "intimissimi", "tezenis", "geox", "ecco", "timberland", "the north face", "patagonia", "skechers", "converse", "vans", "new balance", "boss", "guess"}
+var fashionShops = []string{"zara", "h&m", "mango", "c&a", "uniqlo", "primark", "bershka", "pull&bear", "pull & bear", "stradivarius", "massimo dutti", "arket",
+	"zalando", "about you", "asos", "nike", "adidas", "puma", "deichmann", "reserved", "lc waikiki", "new yorker", "tommy hilfiger", "levi's", "levis", "s.oliver", "tally weijl", "sinsay",
+	"decathlon", "intersport", "sport vision", "humanic", "vinted", "shein", "jack & jones", "vero moda", "lacoste", "ralph lauren",
+	"benetton", "calzedonia", "intimissimi", "tezenis", "geox", "ecco", "timberland", "the north face", "patagonia", "skechers", "converse", "vans", "new balance", "hugo boss", "guess", "cos stores"}
 
-var fashionWords = []string{"cloth", "fashion", "apparel", "shoe", "odjeć", "odjec", "obuć", "obuc", "garderob", "kleidung", "schuhe", "jacket", "jakna", "dress", "haljin",
-	"jeans", "farmerk", "shirt", "košulj", "kosulj", "sneaker", "patik", "boots", "čizm", "cizm", "coat", "kaput", "sweater", "džemper", "dzemper", "hoodie", "trouser", "hlač", "pantalon"}
+var fashionWords = []string{"clothing", "clothes", "fashion", "apparel", "shoes", "odjeća", "odjeca", "obuća", "obuca", "garderob", "kleidung", "schuhe", "jacket", "jakna", "dress", "haljin",
+	"jeans", "farmerk", "shirt", "košulj", "kosulj", "sneaker", "patik", "boots", "čizm", "cizm", "kaput", "sweater", "džemper", "dzemper", "hoodie", "trousers", "hlače", "hlace", "pantalon",
+	"pidžam", "pidzam", "majic", "duks", "suknj", "cipel", "trenerk"}
 
-func looksLikeFashion(parts ...string) bool {
+// fashionWhy says why a purchase looks like clothing ("" = it does not):
+// a shop's name or a clothing word, as a whole word.
+func fashionWhy(parts ...string) string {
 	t := " " + strings.ToLower(strings.Join(parts, " ")) + " "
+	word := func(k string) bool {
+		i := strings.Index(t, k)
+		for i >= 0 {
+			before, after := t[i-1], byte(' ')
+			if i+len(k) < len(t) {
+				after = t[i+len(k)]
+			}
+			if !isLetter(before) && (!isLetter(after) || len(k) >= 5) {
+				return true
+			}
+			j := strings.Index(t[i+1:], k)
+			if j < 0 {
+				break
+			}
+			i += 1 + j
+		}
+		return false
+	}
 	for _, k := range fashionShops {
-		if strings.Contains(t, k) {
-			return true
+		if word(k) {
+			return k
 		}
 	}
 	for _, k := range fashionWords {
-		if strings.Contains(t, k) {
-			return true
+		if word(k) {
+			return k
 		}
 	}
-	return false
+	return ""
 }
+
+func isLetter(c byte) bool { return c >= 'a' && c <= 'z' || c >= 0x80 }
+
+func looksLikeFashion(parts ...string) bool { return fashionWhy(parts...) != "" }
 
 // purchase is a clothing buy in Pocket Money or Pocket Parcels.
 type purchase struct {
@@ -279,6 +304,7 @@ type purchase struct {
 	ReturnBy   string `json:"return_by,omitempty"`
 	URL        string `json:"url,omitempty"`
 	Added      int64  `json:"added"` // the piece it became, 0 = not yet
+	Why        string `json:"why"`   // the shop or the word that made it look like clothing
 }
 
 func (s *Server) moneyPurchases(ctx context.Context, c *clients, days int) ([]purchase, error) {
@@ -292,7 +318,8 @@ func (s *Server) moneyPurchases(ctx context.Context, c *clients, days int) ([]pu
 	}
 	out := []purchase{}
 	for _, m := range rows(v, "items") {
-		if !looksLikeFashion(str(m, "category_name"), str(m, "payee"), str(m, "description")) {
+		why := fashionWhy(str(m, "category_name"), str(m, "payee"), str(m, "description"))
+		if why == "" {
 			continue
 		}
 		amt := int64(num(m, "amount"))
@@ -300,7 +327,7 @@ func (s *Server) moneyPurchases(ctx context.Context, c *clients, days int) ([]pu
 			amt = -amt
 		}
 		out = append(out, purchase{App: "money", Ref: idOf(m), Date: str(m, "date"), Title: firstNonEmpty(str(m, "description"), str(m, "payee")), Shop: str(m, "payee"),
-			Amount: &amt, Currency: str(m, "currency"), URL: linkTo(sib, "/transactions/"+idOf(m))})
+			Amount: &amt, Currency: str(m, "currency"), URL: linkTo(sib, "/transactions/"+idOf(m)), Why: why})
 	}
 	return out, nil
 }

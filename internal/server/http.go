@@ -86,6 +86,7 @@ func (s *Server) Router() http.Handler {
 				r.Put("/outfits/{id}", s.handleUpdateOutfit)
 				r.Delete("/outfits/{id}", s.handleDeleteOutfit)
 				r.Post("/suggest", s.handleSuggest)
+				r.Get("/suggest", s.handleSuggest)
 				r.Post("/rate", s.handleRate)
 				r.Get("/collage", s.handleCollage)
 				r.Get("/styles", s.handleStyles)

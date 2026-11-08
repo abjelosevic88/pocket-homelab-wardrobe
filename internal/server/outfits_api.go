@@ -322,8 +322,15 @@ func (s *Server) suggest(ctx context.Context, uid int64, in suggestInput) sugges
 func (s *Server) handleSuggest(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var in suggestInput
-	if err := decode(r, &in); err != nil || !validDate(in.Date) {
+	if r.Method == http.MethodGet {
+		q := r.URL.Query()
+		in = suggestInput{Date: q.Get("date"), Occasion: q.Get("occasion"), Style: q.Get("style"), N: queryInt(r, "n"), Shuffle: int64(queryInt(r, "shuffle")), Include: int64(queryInt(r, "include"))}
+	} else if err := decode(r, &in); err != nil {
 		writeErr(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	if !validDate(in.Date) {
+		writeErr(w, http.StatusBadRequest, "the day is YYYY-MM-DD")
 		return
 	}
 	writeJSON(w, http.StatusOK, s.suggest(ctx, actorID(ctx), in))

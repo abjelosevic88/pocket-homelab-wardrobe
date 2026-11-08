@@ -177,6 +177,8 @@ func TestLinkScopes(t *testing.T) {
 		{read, r("GET", "/api/v1/today"), true},
 		{read, r("GET", "/api/v1/day/2026-11-08"), true},
 		{read, r("POST", "/api/v1/suggest"), true},
+		{read, r("GET", "/api/v1/suggest"), true},
+		{read, r("GET", "/api/v1/gaps"), true},
 		{read, r("GET", "/api/v1/photos/2"), true},
 		{read, r("POST", "/api/v1/wears"), false},
 		{write, r("POST", "/api/v1/wears"), true},
@@ -240,4 +242,19 @@ func TestSettingsArePersonal(t *testing.T) {
 		t.Fatalf("bob got alice's styles: %v", b)
 	}
 	a.expect(400, a.alice, "PUT", "/api/v1/settings", map[string]any{"shops": []map[string]any{{"name": "X", "url": "https://x.example/search"}}})
+}
+
+func TestFashionPurchases(t *testing.T) {
+	yes := [][]string{{"Odjeća", "Zara BH", ""}, {"", "H&M Sarajevo", ""}, {"", "", "pidzame"}, {"", "Deichmann", "patike za Amara"}, {"Clothing", "", ""}}
+	no := [][]string{{"Namirnice", "Konzum", "Nabavka za kuci"}, {"", "Bingo", "nabavka"}, {"Home", "Next door bakery", "hm"}, {"", "Gapa", ""}}
+	for _, c := range yes {
+		if !looksLikeFashion(c...) {
+			t.Errorf("%v should look like clothing", c)
+		}
+	}
+	for _, c := range no {
+		if w := fashionWhy(c...); w != "" {
+			t.Errorf("%v is not clothing (matched %q)", c, w)
+		}
+	}
 }
