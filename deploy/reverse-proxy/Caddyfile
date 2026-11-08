@@ -1,0 +1,4 @@
+# Pocket Wardrobe behind Caddy.
+wardrobe.example.com {
+	reverse_proxy pocket-wardrobe:8080
+}
