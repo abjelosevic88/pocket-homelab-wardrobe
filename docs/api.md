@@ -46,3 +46,5 @@ Everything the web app does goes through `/api/v1`, with a session cookie or `Au
 `GET /summary` (Homepage), `GET /day/{date}` (Pocket Day), `GET /search?q=` (Pocket Search), `GET /stats?days=90`, `GET /export.json` / `.csv`, `POST /import`.
 
 Another app acting for you with a `pcx_` token reaches only: `wardrobe:read` — `GET summary, today, stats, items, items/{id}, outfits, outfits/{id}, wears, packs, packs/{id}, ideas, styles, search, day/{date}, photos/{id}` and `POST /suggest`; `wardrobe:write` — `POST /items`, `/outfits`, `/wears` and `PUT`/`DELETE` of what it added itself.
+
+Pocket Move can copy your wardrobe out and bring it in: `move:export` reads `GET /export.json` (`kind: pocket`, photos included) and `GET /export.csv`, `move:import` posts a Pocket Wardrobe export to `POST /import` (multipart `file`; adds, never deletes; a second run adds nothing). `GET /pocket/portable` describes both.

@@ -327,5 +327,10 @@ func (s *Server) importPocket(ctx context.Context, uid int64, doc exportDoc) (ma
 		}
 		added["packs"]++
 	}
-	return map[string]any{"added": added}, nil
+	// the counts at the top level too, for Pocket Move
+	out := map[string]any{"added": added}
+	for _, k := range []string{"items", "photos", "outfits", "wears", "ideas", "packs"} {
+		out[k] = added[k]
+	}
+	return out, nil
 }
