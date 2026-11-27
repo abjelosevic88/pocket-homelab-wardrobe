@@ -135,6 +135,11 @@ func (s *Server) Router() http.Handler {
 				r.Get("/day/{date}", s.handleDay)
 				r.Get("/search", s.handleSearch)
 
+				// the same for Pocket Search, Day and Hub, in the shape every app answers in
+				r.Get("/pocket/search", core.SearchHandler(s.pocketSearch))
+				r.Get("/pocket/day/{date}", core.DayHandler(s.pocketDay))
+				r.Get("/pocket/widget", core.WidgetHandler(s.pocketWidget))
+
 				// AI
 				r.Get("/ai/status", s.handleAIStatus)
 				r.Get("/ai/models", s.handleAIModels)

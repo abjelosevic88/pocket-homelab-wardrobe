@@ -406,12 +406,20 @@ func (s *Server) shareURL(uid int64, ids []int64) string {
 	if len(ids) == 0 {
 		return ""
 	}
+	return s.link(s.sharePath(uid, ids))
+}
+
+// sharePath is shareURL as a path in the app.
+func (s *Server) sharePath(uid int64, ids []int64) string {
+	if len(ids) == 0 {
+		return ""
+	}
 	parts := make([]string, 0, len(ids))
 	for _, id := range ids {
 		parts = append(parts, itoa(id))
 	}
 	j := strings.Join(parts, "-")
-	return s.link("/s/" + itoa(uid) + "/" + j + "/" + s.shareSig(context.Background(), uid, j) + ".jpg")
+	return "/s/" + itoa(uid) + "/" + j + "/" + s.shareSig(context.Background(), uid, j) + ".jpg"
 }
 
 func (s *Server) handleSharedCollage(w http.ResponseWriter, r *http.Request) {

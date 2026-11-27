@@ -33,6 +33,16 @@ var portable = &core.Portable{
 	},
 }
 
+// capabilities is what Pocket Search, Pocket Day and Pocket Hub may ask
+// Wardrobe (docs/capabilities.md in pocket-homelab-core); Register adds the
+// pocket:search/day/widget offers, pocket.go answers. Nothing here is a quick
+// one-line add, so there is no capture.
+var capabilities = core.Capabilities{
+	Search: &core.Searchable{What: "Your clothes, saved outfits, packing lists and the ideas worth buying you kept", Kinds: []string{"item", "outfit", "packing list", "idea"}, Bangs: []string{"wardrobe", "clothes"}},
+	Day:    &core.DayFeed{Label: "Wardrobe", One: "outfit", Many: "outfits", Unit: "count", What: "What you wore that day, and the outfit you planned for it"},
+	Widget: &core.Widget{Title: "What to wear", What: "Today's outfit and tomorrow's plan, the next trip to pack for, a piece that waits to be worn, and how many are in the laundry, at the tailor or lent out"},
+}
+
 type linkRoute struct {
 	methods string
 	path    *regexp.Regexp
@@ -53,7 +63,7 @@ var errLinkScope = errors.New("outside the link's scope")
 
 // linkAllows reports whether a link token with these scopes may make this request.
 func linkAllows(scopes []string, r *http.Request) bool {
-	if portable.LinkAllows(scopes, r) {
+	if portable.LinkAllows(scopes, r) || capabilities.LinkAllows(scopes, r) {
 		return true
 	}
 	for _, lr := range linkRoutes {

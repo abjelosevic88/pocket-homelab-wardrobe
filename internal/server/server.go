@@ -215,12 +215,13 @@ func (s *Server) registerWithCore(ctx context.Context) error {
 	m := core.Manifest{
 		Slug: "wardrobe", Name: "Pocket Wardrobe",
 		Description: "Your clothes in one place, with photos: what goes with what for your style, today's outfit for the weather and what is on your calendar, what you wore and when, laundry and the tailor, what to pack for a trip, and what is worth buying (with how many new outfits it makes). It takes the weather from Pocket Weather, the day's events from Pocket Calendar, trips from Pocket Travel, hikes from Pocket Trails and training days from Pocket Fitness; puts things to buy on Pocket Wishlist, finds clothes you bought in Pocket Money and on their way in Pocket Parcels, reminds you in Pocket Tasks, asks someone's opinion in Pocket Chat and saves notes in Pocket Notes. Works on its own too; Pocket AI reads photos of your clothes, styles you, rates a look and suggests what to buy.",
-		Icon:        "/favicon.svg", Version: Version,
+		Icon:        "/favicon.svg", Category: "Home", Version: Version,
 		URL: s.cfg.CoreAppURL, PublicURL: s.cfg.BaseURL, HealthPath: "/healthz", EnvPrefix: "WARDROBE",
-		Publishes: eventTopics,
-		Offers:    linkOffers,
-		Portable:  portable,
-		Uses:      append(linkUses(), core.InferenceUse()),
+		Publishes:    eventTopics,
+		Offers:       linkOffers,
+		Portable:     portable,
+		Capabilities: capabilities,
+		Uses:         append(linkUses(), core.InferenceUse()),
 	}
 	if s.cfg.BaseURL != "" {
 		m.OIDC = &core.OIDCRequest{RedirectURIs: []string{s.oidcCallbackURL()}}

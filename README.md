@@ -98,7 +98,7 @@ Set `CORE_URL` and `CORE_REGISTRATION_KEY` and Wardrobe joins the box: people si
 
 **Nothing depends on another app.** Each app's state is checked per person, and what needs it is shown greyed out with one line saying why and what to do, never hidden.
 
-Other apps use your wardrobe through `wardrobe:read` and `wardrobe:write`: Pocket AI tells you what to wear and logs an outfit when you ask, Pocket Day can write what you wore into your journal (`GET /day/{date}`), Pocket Search finds your pieces and outfits. Events on the bus — `wardrobe.item_added`, `wardrobe.outfit_saved`, `wardrobe.outfit_planned`, `wardrobe.outfit_worn`, `wardrobe.laundry_full`, `wardrobe.idea_saved` — start flows in Pocket Flows. Without Core every connection can be made directly with a URL and a token, and the AI can be your own OpenAI-compatible key (photos included).
+Other apps use your wardrobe through `wardrobe:read` and `wardrobe:write`: Pocket AI tells you what to wear and logs an outfit when you ask. Pocket Search, Pocket Day and Pocket Hub find Wardrobe on their own, with nothing to set up in them: Wardrobe tells Core that your clothes, outfits, packing lists and ideas can be searched (`!wardrobe`, `!clothes`), that it knows what you wore or planned on a day, and that it has a few lines for a home screen (`pocket:search`, `pocket:day`, `pocket:widget`, one route each, see [docs/api.md](docs/api.md)). Events on the bus — `wardrobe.item_added`, `wardrobe.outfit_saved`, `wardrobe.outfit_planned`, `wardrobe.outfit_worn`, `wardrobe.laundry_full`, `wardrobe.idea_saved` — start flows in Pocket Flows. Without Core every connection can be made directly with a URL and a token, and the AI can be your own OpenAI-compatible key (photos included).
 
 ## Develop
 

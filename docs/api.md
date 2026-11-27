@@ -45,6 +45,16 @@ Everything the web app does goes through `/api/v1`, with a session cookie or `Au
 
 `GET /summary` (Homepage), `GET /day/{date}` (Pocket Day), `GET /search?q=` (Pocket Search), `GET /stats?days=90`, `GET /export.json` / `.csv`, `POST /import`.
 
+Pocket Search, Pocket Day and Pocket Hub find Wardrobe on their own: it says in its manifest what it can do, and answers on the routes every Pocket app answers the same way (Pocket Core, `docs/capabilities.md`). Addresses in the answers are paths in Wardrobe.
+
+| Call | Scope | What |
+|---|---|---|
+| `GET /pocket/search?q=navy&limit=8` | `pocket:search` | `{"items": [{"id", "title", "snippet", "kind", "date", "url", "link", "score"}]}`: pieces (`item`: kind, colour, brand, where it is; `date` = last worn), saved outfits (`outfit`: occasion and pieces), packing lists (`packing list`: where, when, how much is packed) and the ideas you kept (`idea`; `link` = the shop page). Words in the name come first. No words → no items |
+| `GET /pocket/day/{date}` | `pocket:day` | `{"date", "summary": "Wore 1 outfit", "items": [{"id", "title", "sub", "kind": "worn\|planned", "url", "image", "note"}]}`: the title is the saved outfit's name, else the pieces; `sub` the occasion and the event; `image` the pieces together, a picture that opens without signing in. A day with nothing: `{"date": "…", "items": []}` |
+| `GET /pocket/widget` | `pocket:widget` | `{"line": "Today: White shirt, Navy chinos", "metrics": [{"label": "In the laundry", "value": "3"}], "items": [{"id", "title", "detail", "url"}], "url": "/"}`: today's outfit (worn, else planned), tomorrow's plan, the next trip to pack for and a piece waiting to be worn; the laundry, the tailor and what is lent out as numbers. Ideas for today need the weather, so they stay in the app |
+
+Signed in, you can call them too. A `pcx_` token with one of these scopes reaches its one route (and `GET /auth/me`) and nothing else; `wardrobe:read` does not open them.
+
 Another app acting for you with a `pcx_` token reaches only: `wardrobe:read` — `GET summary, today, stats, items, items/{id}, outfits, outfits/{id}, wears, packs, packs/{id}, ideas, styles, search, day/{date}, photos/{id}` and `POST /suggest`; `wardrobe:write` — `POST /items`, `/outfits`, `/wears` and `PUT`/`DELETE` of what it added itself.
 
 Pocket Move can copy your wardrobe out and bring it in: `move:export` reads `GET /export.json` (`kind: pocket`, photos included) and `GET /export.csv`, `move:import` posts a Pocket Wardrobe export to `POST /import` (multipart `file`; adds, never deletes; a second run adds nothing). `GET /pocket/portable` describes both.
